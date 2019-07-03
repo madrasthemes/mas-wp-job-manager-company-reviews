@@ -185,21 +185,21 @@ class Mas_WP_Job_Manager_Company_Reviews {
     }
 }
 
-// Bail if WPJM not active.
-if ( class_exists( 'Mas_WP_Job_Manager_Company' ) ) {
-    /**
-     * The main function responsible for returning the Mas_WP_Job_Manager_Company_Reviews object.
-     *
-     * Use this function like you would a global variable, except without needing to declare the global.
-     *
-     * @since 1.0.0
-     *
-     * @return object Mas_WP_Job_Manager_Company_Reviews class object.
-     */
-    function mas_wpjmcr() {
-        return Mas_WP_Job_Manager_Company_Reviews::instance();
-    }
+/**
+ * The main function responsible for returning the Mas_WP_Job_Manager_Company_Reviews object.
+ *
+ * Use this function like you would a global variable, except without needing to declare the global.
+ *
+ * @since 1.0.0
+ *
+ * @return object Mas_WP_Job_Manager_Company_Reviews class object.
+ */
+function mas_wpjmcr() {
+    if ( ! class_exists( 'Mas_WP_Job_Manager_Company' ) )
+        return;
 
-    // Load plugin instance on plugins loaded.
-    add_action( 'plugins_loaded', 'mas_wpjmcr' );
+    return Mas_WP_Job_Manager_Company_Reviews::instance();
 }
+
+// Load plugin instance on plugins loaded.
+add_action( 'plugins_loaded', 'mas_wpjmcr' );
