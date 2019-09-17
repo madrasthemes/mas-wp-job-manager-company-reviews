@@ -131,7 +131,7 @@ class MAS_WPJMCR_Form {
      */
     public function rating_field_for_listing_owner( $post, $current_user, $is_author ) {
         if ( $is_author && ! get_option( 'mas_wpjmcr_allow_owner', '0' ) ) {
-            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( __( "You can't add a star rating to your own product.", 'mas-wp-job-manager-company-reviews' ) ) );
+            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( __( "You can't add a star rating to your own company.", 'mas-wp-job-manager-company-reviews' ) ) );
             add_filter( 'mas_wpjmcr_rating_field', '__return_false' ); // Disable rating field.
         }
     }
