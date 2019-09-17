@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class Mas_WPJMCR_Post_Edit {
+class MAS_WPJMCR_Post_Edit {
 
     /**
      * Constructor Class.

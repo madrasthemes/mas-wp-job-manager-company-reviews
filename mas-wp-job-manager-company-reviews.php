@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Mas Reviews for WP Job Manager Company
+ * Plugin Name: MAS Reviews for WP Job Manager Company
  * Description: Leave reviews for listings in WP Job Manager Company. Define review categories and choose the number of stars available.
  * Version: 1.0.0
  * Author: MadrasThemes
@@ -20,22 +20,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Mas_WP_Job_Manager_Company_Reviews.
+ * Class MAS_WP_Job_Manager_Company_Reviews.
  *
- * Main Mas_WPJMCR class initializes the plugin.
+ * Main MAS_WPJMCR class initializes the plugin.
  *
- * @class     Mas_WP_Job_Manager_Company_Reviews
+ * @class     MAS_WP_Job_Manager_Company_Reviews
  * @version   1.0.0
  * @author    Madras Themes
  */
-class Mas_WP_Job_Manager_Company_Reviews {
+class MAS_WP_Job_Manager_Company_Reviews {
 
     /**
-     * Instace of Mas_WP_Job_Manager_Company_Reviews.
+     * Instace of MAS_WP_Job_Manager_Company_Reviews.
      *
      * @since 1.0.0
      * @access private
-     * @var object $instance The instance of Mas_WPJMCR.
+     * @var object $instance The instance of MAS_WPJMCR.
      */
     private static $instance;
 
@@ -96,34 +96,34 @@ class Mas_WP_Job_Manager_Company_Reviews {
 
         // Review Form.
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-form.php' );
-        $this->form = new Mas_WPJMCR_Form();
+        $this->form = new MAS_WPJMCR_Form();
 
         // Submit Review.
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-submit.php' );
-        $this->submit = new Mas_WPJMCR_Submit();
+        $this->submit = new MAS_WPJMCR_Submit();
 
         // Display Review.
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-display.php' );
-        $this->display = new Mas_WPJMCR_Display();
+        $this->display = new MAS_WPJMCR_Display();
 
         // Edit Review.
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-edit.php' );
-        $this->edit = new Mas_WPJMCR_Edit();
+        $this->edit = new MAS_WPJMCR_Edit();
 
         // Post Edit Screen.
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-post-edit.php' );
-        $this->post_edit = new Mas_WPJMCR_Post_Edit();
+        $this->post_edit = new MAS_WPJMCR_Post_Edit();
 
         // Shortcode [mas_review_stars], [mas_review_average], [mas_review_count], & [mas_review_dashboard].
         require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-shortcodes.php' );
-        $this->shortcodes = new Mas_WPJMCR_Shortcodes();
+        $this->shortcodes = new MAS_WPJMCR_Shortcodes();
 
         /* === SETTINGS === */
 
         // Settings.
         if ( is_admin() ) {
             require_once( $this->plugin_dir . 'includes/class-mas-wpjmcr-settings.php' );
-            $this->settings = new Mas_WPJMCR_Settings();
+            $this->settings = new MAS_WPJMCR_Settings();
         }
 
         /* === INTEGRATIONS === */
@@ -133,7 +133,7 @@ class Mas_WP_Job_Manager_Company_Reviews {
         // Polylang.
         if ( function_exists( 'pll_register_string' ) ) {
             require_once( $this->plugin_dir . 'includes/integrations/class-mas-wpjmcr-polylang.php' );
-            new Mas_WPJMCR_Polylang();
+            new MAS_WPJMCR_Polylang();
         }
 
         // Add comment support for company.
@@ -186,19 +186,19 @@ class Mas_WP_Job_Manager_Company_Reviews {
 }
 
 /**
- * The main function responsible for returning the Mas_WP_Job_Manager_Company_Reviews object.
+ * The main function responsible for returning the MAS_WP_Job_Manager_Company_Reviews object.
  *
  * Use this function like you would a global variable, except without needing to declare the global.
  *
  * @since 1.0.0
  *
- * @return object Mas_WP_Job_Manager_Company_Reviews class object.
+ * @return object MAS_WP_Job_Manager_Company_Reviews class object.
  */
 function mas_wpjmcr() {
-    if ( ! class_exists( 'Mas_WP_Job_Manager_Company' ) )
+    if ( ! class_exists( 'MAS_WP_Job_Manager_Company' ) )
         return;
 
-    return Mas_WP_Job_Manager_Company_Reviews::instance();
+    return MAS_WP_Job_Manager_Company_Reviews::instance();
 }
 
 // Load plugin instance on plugins loaded.

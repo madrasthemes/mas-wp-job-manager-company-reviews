@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class Mas_WPJMCR_Submit {
+class MAS_WPJMCR_Submit {
 
     /**
      * Constructor Class.

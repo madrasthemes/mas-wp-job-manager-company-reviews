@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * @since 1.0.0
  */
-class Mas_WPJMCR_Polylang {
+class MAS_WPJMCR_Polylang {
 
     /**
      * Constructor Class.
@@ -43,7 +43,7 @@ class Mas_WPJMCR_Polylang {
 
         // Register each strings.
         foreach ( $strings as $string ) {
-            pll_register_string( __( 'Mas WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ), $string, __( 'Mas WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ) );
+            pll_register_string( __( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ), $string, __( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ) );
         }
     }
 

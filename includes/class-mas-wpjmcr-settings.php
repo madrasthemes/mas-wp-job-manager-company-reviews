@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class Mas_WPJMCR_Settings {
+class MAS_WPJMCR_Settings {
 
     /**
      * Construct.
