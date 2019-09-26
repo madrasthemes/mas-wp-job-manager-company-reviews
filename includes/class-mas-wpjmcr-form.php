@@ -87,7 +87,7 @@ class MAS_WPJMCR_Form {
                         <label class="form-label" for='<?php echo $index; ?>'><?php echo apply_filters( 'mas_wpjmcr_category_label', $category ); ?></label>
                         <div class='stars choose-rating' data-rating-category='<?php echo $index; ?>'>
                             <?php for ( $i = mas_wpjmcr_get_max_stars(); $i > 0 ; $i-- ) : ?>
-                                    <span data-star-rating='<?php echo $i; ?>' class="star dashicons dashicons-star-empty"></span>
+                                <span data-star-rating='<?php echo $i; ?>' class="star dashicons dashicons-star-empty"></span>
                             <?php endfor; ?>
                             <input type='hidden' class='required' name='star-rating-<?php echo $index; ?>' value=''>
                         </div>
@@ -99,10 +99,13 @@ class MAS_WPJMCR_Form {
 
         <?php if ( get_option( 'mas_wpjmcr_allow_images', false ) ) : ?>
             <div id="mas-wpjmcr-submit-gallery" class="review-form-gallery mb-6">
-                <label class="btn btn-sm btn-primary transition-3d-hover file-attachment-btn" for="mas-wpjmcr-gallery-input">
-                    <?php esc_html_e( 'Photo Gallery', 'mas-wp-job-manager-company-reviews' ); ?>
+                <div class="btn btn-sm btn-primary transition-3d-hover file-attachment-btn" for="mas-wpjmcr-gallery-input">
+                    <?php $label_text = apply_filters( 'mas_wpjmcr_upload_button_text', __( 'Photo Gallery', 'mas-wp-job-manager-company-reviews' ) ); ?>
+                    <label class="sr-only"><?php echo esc_html( $label_text ) ?></label>
+                    <span><?php echo esc_html( $label_text ) ?></span>
+                    <?php ; ?>
                     <input id="mas-wpjmcr-gallery-input" name="mas-wpjmcr-gallery[]" type="file" multiple="multiple" accept="image/*" class="file-attachment-btn__label">
-                </label>
+                </div>
             </div><!-- #mas-wpjmcr-submit-gallery -->
         <?php endif; ?>
 

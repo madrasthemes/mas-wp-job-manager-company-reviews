@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MAS Reviews for WP Job Manager Company 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/madrasthemes/masvideos/issues\n"
-"POT-Creation-Date: 2019-09-17 10:01:12+00:00\n"
+"POT-Creation-Date: 2019-09-26 07:21:35+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -41,22 +41,22 @@ msgstr ""
 msgid "Photo Gallery"
 msgstr ""
 
-#: includes/class-mas-wpjmcr-form.php:112
+#: includes/class-mas-wpjmcr-form.php:115
 #: includes/class-mas-wpjmcr-settings.php:125
 msgid "Comment Title"
 msgstr ""
 
-#: includes/class-mas-wpjmcr-form.php:134
+#: includes/class-mas-wpjmcr-form.php:137
 msgid "You can't add a star rating to your own company."
 msgstr ""
 
-#: includes/class-mas-wpjmcr-form.php:156
+#: includes/class-mas-wpjmcr-form.php:159
 msgid ""
 "Guests are not allowed to post a review. Please <a href=\"%s\">log in</a> "
 "to review."
 msgstr ""
 
-#: includes/class-mas-wpjmcr-form.php:198
+#: includes/class-mas-wpjmcr-form.php:201
 msgid "You have already posted a review."
 msgstr ""
 
