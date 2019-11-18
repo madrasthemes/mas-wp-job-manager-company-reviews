@@ -59,15 +59,22 @@ class MAS_WPJMCR_Display {
 
         // Get reviews: Array/list of ratings with slug and rating.
         $ratings = get_comment_meta( $comment_id, 'review_stars', true );
+        $review_title_text = get_comment_meta( get_comment_ID(), 'mas-wpjmcr-title', true );
         $review_average = mas_wpjmcr_sanitize_number( get_comment_meta( $comment_id, 'review_average', true ) );
-        if ( ! $ratings || ! is_array( $ratings ) || ! $review_average ) {
+        if ( ! $ratings || ! is_array( $ratings ) || ! $review_average || ! $review_title_text ) {
             return $content;
+        }
+
+        if( !empty( $review_title_text ) ) {
+            $review_title = '<h4 class="mas-wpjmcr-title">' . $review_title_text . '</h4>';
+        } else {
+            $review_title = '';
         }
 
         // Display rating and json markup before comment text.
         $stars = mas_wpjmcr_review_get_stars( $comment_id );
         $json  = sprintf( '<script type="application/ld+json">%s</script>', wp_json_encode( $this->json_ld( $comment_id, $content, $review_average ) ) );
-        return $stars . $json . $content;
+        return $stars . $json . $review_title . $content;
     }
 
     /**

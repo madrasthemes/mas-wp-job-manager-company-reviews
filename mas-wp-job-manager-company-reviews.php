@@ -151,6 +151,7 @@ class MAS_WP_Job_Manager_Company_Reviews {
      */
     public function add_comments_support() {
         add_post_type_support( 'company', 'comments' );
+        add_action( 'single_company_content_end', 'comments_template' );
     }
 
     /**
