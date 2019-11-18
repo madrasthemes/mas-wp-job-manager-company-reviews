@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MAS Company Reviews For WP Job Manager 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/madrasthemes/masvideos/issues\n"
-"POT-Creation-Date: 2019-11-18 08:53:47+00:00\n"
+"POT-Creation-Date: 2019-11-18 14:00:55+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -29,7 +29,7 @@ msgstr ""
 msgid "Delete images:"
 msgstr ""
 
-#: includes/class-mas-wpjmcr-edit.php:231 includes/functions.php:509
+#: includes/class-mas-wpjmcr-edit.php:231 includes/functions.php:512
 msgid "Delete"
 msgstr ""
 
@@ -197,15 +197,15 @@ msgstr ""
 msgid "Price"
 msgstr ""
 
-#: includes/functions.php:506
+#: includes/functions.php:509
 msgid "Approve"
 msgstr ""
 
-#: includes/functions.php:507
+#: includes/functions.php:510
 msgid "Unapprove"
 msgstr ""
 
-#: includes/functions.php:508 templates/job-review-moderate.php:53
+#: includes/functions.php:511 templates/job-review-moderate.php:53
 msgid "Spam"
 msgstr ""
 
