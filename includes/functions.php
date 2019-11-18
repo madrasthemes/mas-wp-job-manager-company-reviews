@@ -310,20 +310,23 @@ if ( ! function_exists( 'mas_wpjmcr_review_get_stars' ) ) {
     function mas_wpjmcr_review_get_stars( $comment_id ) {
         $ratings = get_comment_meta( $comment_id, 'review_stars', true );
         if( !empty( $ratings ) ) {
-            ob_start();
-            ?>
-                <div class='mas-wpjmcr-list-reviews'>
-                    <?php foreach ( $ratings as $category => $rating ) :
-                            $category = apply_filters( 'mas_wpjmcr_category_label', $category );
-                        ?>
-                        <div class='stars-rating star-rating'>
-                            <div class='star-rating-title'><?php echo esc_html( $category ); ?></div>
-                            <?php for ( $i = 0; $i < mas_wpjmcr_get_max_stars(); $i++ ) : ?><span class="dashicons dashicons-star-<?php echo $i < $rating ? 'filled' : 'empty'; ?>"></span><?php endfor; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php
-            return ob_get_clean();
+            $review_stars = '<div class="mas-wpjmcr-list-reviews">';
+            foreach ( $ratings as $category => $rating ) {
+                $category = apply_filters( 'mas_wpjmcr_category_label', $category );
+                $review_stars .= '<div class="stars-rating star-rating">';
+                $review_stars .= '<div class="star-rating-title">';
+                $review_stars .= esc_html( $category );
+                $review_stars .= '</div>';
+                $review_stars .= '<div class="ratings">';
+                for ( $i = 0; $i < mas_wpjmcr_get_max_stars(); $i++ ) {
+                    $review_stars .= '<span class="dashicons dashicons-star-' . ( $i < $rating ? 'filled' : 'empty' ) . '"></span>';
+                }
+                $review_stars .= '</div>';
+                $review_stars .= '</div>';
+            }
+            $review_stars .= '</div>';
+
+            return $review_stars;
         }
     }
 }
