@@ -1,15 +1,18 @@
-=== MAS WP Job Manager Company Reviews ===
+=== MAS Company Reviews For WP Job Manager ===
 Contributors: madrasthemes, yousufansa, farookibrahim, ibndawood
-Requires PHP: 5.6
+Tags: company review, company reviews, company listings review, company management, company manager, job, job listing
 Requires at least: 4.7
-Tested up to: 5.2
-License: GNU General Public License v3.0
+Tested up to: 5.3
+Requires PHP: 5.6
+Stable tag: 1.0.0
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-MAS WP Job Manager Company Reviews is a free plugin that allow you to review companies in multiple review categories and controlling star count.
+MAS Company Reviews For WP Job Manager is a free plugin that allow you to review companies in multiple review categories and controlling star count.
 
 == Description ==
 
-MAS WP Job Manager Company Reviews plugin is an extension of MAS WP Job Manager Company plugin that allow your users to review companies in multiple review categories.
+MAS Company Reviews For WP Job Manager plugin is an extension of MAS WP Job Manager Company plugin that allow your users to review companies in multiple review categories.
 
 Also user can post images on thier reviews.
 
@@ -21,9 +24,9 @@ Also user can post images on thier reviews.
 
 = Automatic installation =
 
-Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t need to leave your web browser. To do an automatic install of MAS WP Job Manager Company Reviews, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
+Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t need to leave your web browser. To do an automatic install of MAS Company Reviews For WP Job Manager, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
 
-In the search field type “MAS WP Job Manager Company Reviews” and click Search Plugins. Once you’ve found our plugin you can view details about it such as the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
+In the search field type “MAS Company Reviews For WP Job Manager” and click Search Plugins. Once you’ve found our plugin you can view details about it such as the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
 
 = Manual installation =
 
@@ -39,18 +42,26 @@ You can configure the company review settings on Job Listings -> Settings -> Com
 
 == Frequently Asked Questions ==
 
-= Will MAS WP Job Manager Company Reviews work with my theme? =
+= Will MAS Company Reviews For WP Job Manager work with my theme? =
 
-Yes; MAS WP Job Manager Company Reviews will work with any theme having active WP Job Manager & MAS WP Job Manager Company plugins.
+Yes; MAS Company Reviews For WP Job Manager will work with any theme having active WP Job Manager & MAS WP Job Manager Company plugins.
 
 = Where can I report bugs or contribute to the project? =
 
-Bugs can be reported either in our support forum or preferably on the [MAS WP Job Manager Company Reviews GitHub repository](https://github.com/madrasthemes/mas-wp-job-manager-company-reviews/issues).
+Bugs can be reported either in our support forum or preferably on the [MAS Company Reviews For WP Job Manager GitHub repository](https://github.com/madrasthemes/mas-wp-job-manager-company-reviews/issues).
 
 = Can I contribute? =
 
 Yes you can! Join in on our [GitHub repository](https://github.com/madrasthemes/mas-wp-job-manager-company-reviews) :)
 
+== Screenshots ==
+
+1. Review Form.
+2. Review Dashboard Page.
+3. Review Dashboard Page Content.
+4. Review Settings.
+
 == Changelog ==
 
-* Initial release
+= 1.0.0 - 2019-11-18 =
+* Initial Release
