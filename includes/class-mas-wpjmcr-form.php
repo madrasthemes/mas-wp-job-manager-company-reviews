@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */
@@ -100,7 +100,7 @@ class MAS_WPJMCR_Form {
         <?php if ( get_option( 'mas_wpjmcr_allow_images', false ) ) : ?>
             <div id="mas-wpjmcr-submit-gallery" class="review-form-gallery mb-6">
                 <div class="btn btn-sm btn-primary transition-3d-hover file-attachment-btn" for="mas-wpjmcr-gallery-input">
-                    <?php $label_text = apply_filters( 'mas_wpjmcr_upload_button_text', __( 'Photo Gallery', 'mas-wp-job-manager-company-reviews' ) ); ?>
+                    <?php $label_text = apply_filters( 'mas_wpjmcr_upload_button_text', esc_html__( 'Photo Gallery', 'mas-wp-job-manager-company-reviews' ) ); ?>
                     <label class="sr-only"><?php echo esc_html( $label_text ) ?></label>
                     <span><?php echo esc_html( $label_text ) ?></span>
                     <?php ; ?>
@@ -134,7 +134,7 @@ class MAS_WPJMCR_Form {
      */
     public function rating_field_for_listing_owner( $post, $current_user, $is_author ) {
         if ( $is_author && ! get_option( 'mas_wpjmcr_allow_owner', '0' ) ) {
-            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( __( "You can't add a star rating to your own company.", 'mas-wp-job-manager-company-reviews' ) ) );
+            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( esc_html__( "You can't add a star rating to your own company.", 'mas-wp-job-manager-company-reviews' ) ) );
             add_filter( 'mas_wpjmcr_rating_field', '__return_false' ); // Disable rating field.
         }
     }
@@ -156,7 +156,7 @@ class MAS_WPJMCR_Form {
         if ( ! $allow_guests && ! is_user_logged_in() ) {
             ?>
             <div id="mas-wpjmcr-restriction-messages" class="review-form-stars">
-                <?php echo sprintf( __( 'Guests are not allowed to post a review. Please <a href="%s">log in</a> to review.', 'mas-wp-job-manager-company-reviews' ), esc_url( wp_login_url( get_permalink() ) ) ); ?>
+                <?php echo sprintf( esc_html__( 'Guests are not allowed to post a review. Please <a href="%s">log in</a> to review.', 'mas-wp-job-manager-company-reviews' ), esc_url( wp_login_url( get_permalink() ) ) ); ?>
             </div><!-- #mas-wpjmcr-restriction-messages -->
             <?php
             // Disable rating field and close comment fields.
@@ -198,7 +198,7 @@ class MAS_WPJMCR_Form {
 
         // Comment found, show messages and disable comment.
         if ( count( $usercomments ) ) {
-            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( __( "You have already posted a review.", 'mas-wp-job-manager-company-reviews' ) ) );
+            echo sprintf( '<div id="mas-wpjmcr-restriction-messages" class="review-form-stars">%s</div>', wpautop( esc_html__( "You have already posted a review.", 'mas-wp-job-manager-company-reviews' ) ) );
 
             // Disable rating field and close comment fields.
             add_filter( 'mas_wpjmcr_rating_field', '__return_false' );

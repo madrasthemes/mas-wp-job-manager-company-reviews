@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */
@@ -76,7 +76,7 @@ class MAS_WPJMCR_Submit {
         // Loop category, bail if a category not set. Each comment require user to fill all rating categories.
         foreach ( $review_categories as $category_slug => $review_category ) {
             if ( ! isset( $_POST[ 'star-rating-' . $category_slug ] ) || empty( $_POST[ 'star-rating-' . $category_slug ] ) ) {
-                wp_die( __( '<strong>ERROR:</strong> Please select a rating for all categories.', 'mas-wp-job-manager-company-reviews' ) );
+                wp_die( esc_html__( '<strong>ERROR:</strong> Please select a rating for all categories.', 'mas-wp-job-manager-company-reviews' ) );
                 $approved = false; // No really needed.
             }
         }
@@ -136,7 +136,7 @@ class MAS_WPJMCR_Submit {
             if ( isset ( $_POST['star-rating-' . $index ] ) ) {
 
                 // Single cat review value.
-                $value = $_POST['star-rating-' . $index ];
+                $value = sanitize_text_field( $_POST['star-rating-' . $index ] );
 
                 // Stars.
                 $stars[ $category ] = $value;

@@ -43,7 +43,7 @@ class MAS_WPJMCR_Polylang {
 
         // Register each strings.
         foreach ( $strings as $string ) {
-            pll_register_string( __( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ), $string, __( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ) );
+            pll_register_string( esc_html__( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ), $string, esc_html__( 'MAS WP Job Manager Company Reviews', 'mas-wp-job-manager-company-reviews' ) );
         }
     }
 

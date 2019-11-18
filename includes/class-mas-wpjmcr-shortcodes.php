@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */
@@ -130,11 +130,11 @@ class MAS_WPJMCR_Shortcodes {
         $can_moderate = get_option( 'mas_wpjmcr_listing_authors_can_moderate', '0' );
 
         if ( ! $can_moderate ) {
-            return wpautop( __( 'Review moderation has not been enabled.', 'mas-wp-job-manager-company-reviews' ) );
+            return wpautop( esc_html__( 'Review moderation has not been enabled.', 'mas-wp-job-manager-company-reviews' ) );
         }
 
         if ( ! is_user_logged_in() ) {
-            return wpautop( __( 'Please log in to moderate reviews.', 'mas-wp-job-manager-company-reviews' ) );
+            return wpautop( esc_html__( 'Please log in to moderate reviews.', 'mas-wp-job-manager-company-reviews' ) );
         }
 
         // Get all user listings.
@@ -243,7 +243,7 @@ class MAS_WPJMCR_Shortcodes {
             $args = array(
                 'to'       => get_bloginfo( 'admin_email' ),
                 'reply_to' => $current_user->user_email,
-                'message'  => sprintf( __( '%1$s requested a review moderation for Review #%2$s for %3$s', 'mas-wp-job-manager-company-reviews' ), "{$current_user->display_name} ({$current_user->user_email})", $comment->comment_ID, $post->post_title ) . '<br/><br/>' . get_edit_comment_link( $comment ),
+                'message'  => sprintf( esc_html__( '%1$s requested a review moderation for Review #%2$s for %3$s', 'mas-wp-job-manager-company-reviews' ), "{$current_user->display_name} ({$current_user->user_email})", $comment->comment_ID, $post->post_title ) . '<br/><br/>' . get_edit_comment_link( $comment ),
             );
             $sent = mas_wpjmcr_send_mail( $args );
 
@@ -252,12 +252,12 @@ class MAS_WPJMCR_Shortcodes {
                 $args = array(
                     'to'       => $current_user->user_email,
                     'reply_to' => get_bloginfo( 'admin_email' ),
-                    'message'  => sprintf( __( 'Your review moderation request for %1$s was sent successfully.', 'mas-wp-job-manager-company-reviews' ), "{$post->post_title} (Review #{$comment->comment_ID})" ),
+                    'message'  => sprintf( esc_html__( 'Your review moderation request for %1$s was sent successfully.', 'mas-wp-job-manager-company-reviews' ), "{$post->post_title} (Review #{$comment->comment_ID})" ),
                 );
                 mas_wpjmcr_send_mail( $args );
 
                 // Notice.
-                mas_wpjmcr_set_dashboard_notices( sprintf( __( 'Review #%1$d for %2$s reported to site admin.', 'mas-wp-job-manager-company-reviews' ), $comment->comment_ID, $post->post_title ) );
+                mas_wpjmcr_set_dashboard_notices( sprintf( esc_html__( 'Review #%1$d for %2$s reported to site admin.', 'mas-wp-job-manager-company-reviews' ), $comment->comment_ID, $post->post_title ) );
             }
 
         } else { // Other Actions.
@@ -283,7 +283,7 @@ class MAS_WPJMCR_Shortcodes {
 
             // Add updated notice.
             if ( $updated ) {
-                mas_wpjmcr_set_dashboard_notices( sprintf( __( 'Review #%1$d for %2$s updated.', 'mas-wp-job-manager-company-reviews' ), $comment->comment_ID, $post->post_title ) );
+                mas_wpjmcr_set_dashboard_notices( sprintf( esc_html__( 'Review #%1$d for %2$s updated.', 'mas-wp-job-manager-company-reviews' ), $comment->comment_ID, $post->post_title ) );
             }
 
         }

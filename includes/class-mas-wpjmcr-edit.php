@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */
@@ -106,7 +106,7 @@ class MAS_WPJMCR_Edit {
         // Add meta box title.
         add_meta_box(
             $id         = 'mas-wpjmcr-title',
-            $title      = __( 'Title', 'mas-wp-job-manager-company-reviews' ),
+            $title      = esc_html__( 'Title', 'mas-wp-job-manager-company-reviews' ),
             $callback   = array( $this, 'output_comment_title' ),
             $screen     = 'comment',
             $context    = 'normal' // Only "normal" is valid for comment.
@@ -115,7 +115,7 @@ class MAS_WPJMCR_Edit {
         // Add meta box review.
         add_meta_box(
             $id         = 'wpjmcr',
-            $title      = __( 'Review', 'mas-wp-job-manager-company-reviews' ),
+            $title      = esc_html__( 'Review', 'mas-wp-job-manager-company-reviews' ),
             $callback   = array( $this, 'output' ),
             $screen     = 'comment',
             $context    = 'normal' // Only "normal" is valid for comment.
@@ -124,7 +124,7 @@ class MAS_WPJMCR_Edit {
         // Add meta box gallery.
         add_meta_box(
             $id         = 'mas-wpjmcr-gallery',
-            $title      = __( 'Gallery', 'mas-wp-job-manager-company-reviews' ),
+            $title      = esc_html__( 'Gallery', 'mas-wp-job-manager-company-reviews' ),
             $callback   = array( $this, 'output_gallery' ),
             $screen     = 'comment',
             $context    = 'normal' // Only "normal" is valid for comment.
@@ -294,7 +294,7 @@ class MAS_WPJMCR_Edit {
             if ( isset ( $_POST['star-rating-' . $index ] ) ) {
 
                 // Single cat review value.
-                $value = $_POST['star-rating-' . $index ];
+                $value = sanitize_text_field( $_POST['star-rating-' . $index ] );
 
                 // Stars.
                 $stars[ $category ] = $value;

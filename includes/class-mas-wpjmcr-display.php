@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */

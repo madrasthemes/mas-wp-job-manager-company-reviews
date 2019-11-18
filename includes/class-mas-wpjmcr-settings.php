@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */
@@ -49,22 +49,22 @@ class MAS_WPJMCR_Settings {
     public function settings_tab( $settings ) {
 
         $settings['mas_wpjmcr_settings'] = array(
-            __( 'Company Reviews', 'mas-wp-job-manager-company-reviews' ),
+            esc_html__( 'Company Reviews', 'mas-wp-job-manager-company-reviews' ),
             array(
                 array(
                     'name'          => 'mas_wpjmcr_star_count',
                     'std'           => '5',
                     'placeholder'   => '',
-                    'label'         => __( 'Stars', 'mas-wp-job-manager-company-reviews' ),
-                    'desc'          => __( 'How many stars would you like to use?', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Stars', 'mas-wp-job-manager-company-reviews' ),
+                    'desc'          => esc_html__( 'How many stars would you like to use?', 'mas-wp-job-manager-company-reviews' ),
                     'attributes'    => array()
                 ),
                 array(
                     'name'          => 'mas_wpjmcr_categories',
                     'std'           => implode( ',', mas_wpjmcr_get_categories() ),
                     'placeholder'   => '',
-                    'label'         => __( 'Review categories', 'mas-wp-job-manager-company-reviews' ),
-                    'desc'          => __( 'Categories you would you like to use, each category seperated by comma(,).', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Review categories', 'mas-wp-job-manager-company-reviews' ),
+                    'desc'          => esc_html__( 'Categories you would you like to use, each category seperated by comma(,).', 'mas-wp-job-manager-company-reviews' ),
                     'attributes'    => array(),
                     'type'          => 'text'
                 ),
@@ -72,9 +72,9 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_listing_authors_can_moderate',
                     'std'           => '0',
                     'placeholder'   => '',
-                    'label'         => __( 'Listing owners can moderate reviews', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Listing owners can moderate reviews', 'mas-wp-job-manager-company-reviews' ),
-                    'desc'          => __( 'Let listing owners moderate the reviews on their listings.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Listing owners can moderate reviews', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Listing owners can moderate reviews', 'mas-wp-job-manager-company-reviews' ),
+                    'desc'          => esc_html__( 'Let listing owners moderate the reviews on their listings.', 'mas-wp-job-manager-company-reviews' ),
                     'attributes'    => array(),
                     'type'          => 'checkbox'
                 ),
@@ -82,8 +82,8 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_allow_owner',
                     'std'           => '0',
                     'placeholder'   => '',
-                    'label'         => __( 'Allow listing owner review', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow listing owners to review their own listings.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Allow listing owner review', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow listing owners to review their own listings.', 'mas-wp-job-manager-company-reviews' ),
                     'desc'          => '',
                     'attributes'    => array(),
                     'type'          => 'checkbox'
@@ -92,8 +92,8 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_allow_multiple',
                     'std'           => '0',
                     'placeholder'   => '',
-                    'label'         => __( 'Allow multiple review', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow multiple review from the same user (does not apply to listing owner).', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Allow multiple review', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow multiple review from the same user (does not apply to listing owner).', 'mas-wp-job-manager-company-reviews' ),
                     'desc'          => '',
                     'attributes'    => array(),
                     'type'          => 'checkbox'
@@ -102,8 +102,8 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_allow_guests',
                     'std'           => '1',
                     'placeholder'   => '',
-                    'label'         => __( 'Allow guests to review', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow logged out users to leave a review.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Allow guests to review', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow logged out users to leave a review.', 'mas-wp-job-manager-company-reviews' ),
                     'desc'          => '',
                     'attributes'    => array(),
                     'type'          => 'checkbox'
@@ -112,8 +112,8 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_allow_blank_comment',
                     'std'           => '0',
                     'placeholder'   => '',
-                    'label'         => __( 'Allow blank comment', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow blank comment content in review.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Allow blank comment', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow blank comment content in review.', 'mas-wp-job-manager-company-reviews' ),
                     'desc'          => '',
                     'attributes'    => array(),
                     'type'          => 'checkbox'
@@ -122,9 +122,9 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_enable_title',
                     'std'           => '1',
                     'placeholder'   => '',
-                    'label'         => __( 'Comment Title', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow users to add comment title to their review.', 'mas-wp-job-manager-company-reviews' ),
-                    'desc'          => __( 'If enabled user can add comment title when they submit review.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Comment Title', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow users to add comment title to their review.', 'mas-wp-job-manager-company-reviews' ),
+                    'desc'          => esc_html__( 'If enabled user can add comment title when they submit review.', 'mas-wp-job-manager-company-reviews' ),
                     'attributes'    => array(),
                     'type'          => 'checkbox',
                 ),
@@ -132,16 +132,16 @@ class MAS_WPJMCR_Settings {
                     'name'          => 'mas_wpjmcr_allow_images',
                     'std'           => '1',
                     'placeholder'   => '',
-                    'label'         => __( 'Image Upload', 'mas-wp-job-manager-company-reviews' ),
-                    'cb_label'      => __( 'Allow users to add image gallery to their review.', 'mas-wp-job-manager-company-reviews' ),
-                    'desc'          => __( 'If enabled user can upload gallery when they submit review.', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Image Upload', 'mas-wp-job-manager-company-reviews' ),
+                    'cb_label'      => esc_html__( 'Allow users to add image gallery to their review.', 'mas-wp-job-manager-company-reviews' ),
+                    'desc'          => esc_html__( 'If enabled user can upload gallery when they submit review.', 'mas-wp-job-manager-company-reviews' ),
                     'attributes'    => array(),
                     'type'          => 'checkbox',
                 ),
                 array(
                     'name'          => 'mas_wpjmcr_dashboard_actions',
                     'std'           => array( 'approve', 'unapprove', 'spam', 'trash' ),
-                    'label'         => __( 'Dashboard Actions', 'mas-wp-job-manager-company-reviews' ),
+                    'label'         => esc_html__( 'Dashboard Actions', 'mas-wp-job-manager-company-reviews' ),
                     'type'          => 'mas_wpjmcr_dashboard_actions',
                 ),
             ),

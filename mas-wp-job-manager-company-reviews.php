@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: MAS Reviews for WP Job Manager Company
- * Description: Leave reviews for listings in WP Job Manager Company. Define review categories and choose the number of stars available.
+ * Plugin Name: MAS WP Job Manager Company Reviews
+ * Description: Leave reviews for listings in MAS WP Job Manager Company. Define review categories and choose the number of stars available.
  * Version: 1.0.0
  * Author: MadrasThemes
  * Author URI: https://madrasthemes.com/
@@ -9,7 +9,7 @@
  * Text Domain: mas-wp-job-manager-company-reviews
  * Domain Path: /languages/
  *
- * @package Reviews
+ * @package MAS WP Job Manager Company Reviews
  * @category Core
  * @author Madras Themes
  */

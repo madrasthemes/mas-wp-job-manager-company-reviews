@@ -38,23 +38,23 @@
                     <?php
                     // Vars:
                     $actions = mas_wpjmcr_dashboard_actions( true ); // Get active actions.
-                    $title = ! empty( $review->post_title ) ? $review->post_title : __( '(no title)', 'mas-wp-job-manager-company-reviews' );
+                    $title = ! empty( $review->post_title ) ? $review->post_title : esc_html__( '(no title)', 'mas-wp-job-manager-company-reviews' );
                     $content = get_comment_text( $review->comment_ID );
 
                     // Get status and unset unneeded actions.
                     $status = '';
                     if ( '0' == $review->comment_approved ) {
-                        $status = __( 'Unapproved', 'mas-wp-job-manager-company-reviews' );
+                        $status = esc_html__( 'Unapproved', 'mas-wp-job-manager-company-reviews' );
                         unset( $actions['unapprove'] );
                     } elseif ( '1' == $review->comment_approved ) {
-                        $status = __( 'Approved', 'mas-wp-job-manager-company-reviews' );
+                        $status = esc_html__( 'Approved', 'mas-wp-job-manager-company-reviews' );
                         unset( $actions['approve'] );
                     } elseif ( 'spam' == $review->comment_approved ) {
-                        $status = __( 'Spam', 'mas-wp-job-manager-company-reviews' );
+                        $status = esc_html__( 'Spam', 'mas-wp-job-manager-company-reviews' );
                         unset( $actions[ $approve ] );
                         unset( $actions['spam'] );
                     } elseif ( 'trash' == $review->comment_approved ) {
-                        $status = __( 'Deleted', 'mas-wp-job-manager-company-reviews' );
+                        $status = esc_html__( 'Deleted', 'mas-wp-job-manager-company-reviews' );
                         unset( $actions['trash'] );
                     }
                     ?>
@@ -67,7 +67,7 @@
                             </div><!-- .review-content -->
 
                             <div class='review-content-listing'>
-                                <strong><?php echo sprintf( __( 'On listing %s', 'mas-wp-job-manager-company-reviews' ), '<a href="' . get_permalink( $review->comment_post_ID ) . '">' . $title . '</a>' ); ?></strong>
+                                <strong><?php echo sprintf( esc_html__( 'On listing %s', 'mas-wp-job-manager-company-reviews' ), '<a href="' . get_permalink( $review->comment_post_ID ) . '">' . $title . '</a>' ); ?></strong>
                             </div><!-- .review-content-listing -->
                         </td>
 
