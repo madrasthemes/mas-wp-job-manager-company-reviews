@@ -156,7 +156,7 @@ class MAS_WPJMCR_Form {
         if ( ! $allow_guests && ! is_user_logged_in() ) {
             ?>
             <div id="mas-wpjmcr-restriction-messages" class="review-form-stars">
-                <?php echo sprintf( esc_html__( 'Guests are not allowed to post a review. Please <a href="%s">log in</a> to review.', 'mas-wp-job-manager-company-reviews' ), esc_url( wp_login_url( get_permalink() ) ) ); ?>
+                <?php echo sprintf( wp_kses_post( __( 'Guests are not allowed to post a review. Please <a href="%s">log in</a> to review.', 'mas-wp-job-manager-company-reviews' ) ), esc_url( apply_filters( 'mas_wpjmcr_rating_field_login_redirect_url', wp_login_url( get_permalink() ) ) ) ); ?>
             </div><!-- #mas-wpjmcr-restriction-messages -->
             <?php
             // Disable rating field and close comment fields.
