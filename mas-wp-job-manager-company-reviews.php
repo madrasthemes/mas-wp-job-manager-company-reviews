@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MAS Company Reviews For WP Job Manager
  * Description: Leave reviews for listings in MAS WP Job Manager Company. Define review categories and choose the number of stars available.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: MadrasThemes
  * Author URI: https://madrasthemes.com/
  *
@@ -38,6 +38,8 @@ class MAS_WP_Job_Manager_Company_Reviews {
      * @var object $instance The instance of MAS_WPJMCR.
      */
     private static $instance;
+
+    public $version = '1.0.1';
 
     /**
      * Plugin file.

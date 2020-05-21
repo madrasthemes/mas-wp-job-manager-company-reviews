@@ -4,7 +4,7 @@ Tags: company review, company reviews, company listings review, company manageme
 Requires at least: 4.7
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -62,6 +62,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/madrasthemes/
 4. Review Settings.
 
 == Changelog ==
+
+= 1.0.1 - 2020-05-21 =
+* Fix – Guest user login link text escape issue fixed
 
 = 1.0.0 - 2019-11-18 =
 * Initial Release
