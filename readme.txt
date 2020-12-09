@@ -2,7 +2,7 @@
 Contributors: madrasthemes, yousufansa, farookibrahim, ibndawood
 Tags: company review, company reviews, company listings review, company management, company manager, job, job listing
 Requires at least: 4.7
-Tested up to: 5.4
+Tested up to: 5.6
 Requires PHP: 5.6
 Stable tag: 1.0.1
 License: GPLv3
