@@ -24,18 +24,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Main MAS_WPJMCR class initializes the plugin.
  *
- * @class     MAS_WP_Job_Manager_Company_Reviews
- * @version   1.0.0
- * @author    Madras Themes
+ * @class   MAS_WP_Job_Manager_Company_Reviews
+ * @version 1.0.0
+ * @author  MadrasThemes
  */
 class MAS_WP_Job_Manager_Company_Reviews {
 
     /**
      * Instace of MAS_WP_Job_Manager_Company_Reviews.
      *
-     * @since 1.0.0
+     * @since  1.0.0
      * @access private
-     * @var object $instance The instance of MAS_WPJMCR.
+     * @var    object $instance The instance of MAS_WPJMCR.
      */
     private static $instance;
 
