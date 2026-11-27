@@ -162,7 +162,7 @@ class MAS_WPJMCR_Settings {
         <?php foreach( $actions as $action => $label ) : ?>
             <p>
                 <label>
-                    <input name="<?php echo esc_attr( $option['name'] ); ?>[]" type="checkbox" value="<?php echo esc_attr( $action ); ?>" <?php echo in_array( $action, $value ) ? 'checked="checked"' : ''; ?>> <?php echo esc_html( $label ); ?>
+                    <input name="<?php echo esc_attr( $option['name'] ); ?>[]" type="checkbox" value="<?php echo esc_attr( $action ); ?>" <?php checked( in_array( $action, $value, true ) ); ?>> <?php echo esc_html( $label ); ?>
                 </label>
             </p>
         <?php endforeach; ?>

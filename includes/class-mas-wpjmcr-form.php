@@ -57,7 +57,10 @@ class MAS_WPJMCR_Form {
         }
 
         // Var.
-        $post         = get_post();
+        $post = get_post();
+        if ( ! $post ) {
+            return;
+        }
         $current_user = wp_get_current_user();
         $is_author    = $current_user->ID && absint( $current_user->ID ) === absint( $post->post_author );
 
@@ -82,14 +85,16 @@ class MAS_WPJMCR_Form {
         <div id='mas-wpjmcr-submit-ratings' class='review-form-stars'>
             <div class='star-ratings ratings list-inline'>
 
-                <?php foreach ( mas_wpjmcr_get_categories() as $index => $category ) : ?>
+                <?php
+                $max_stars = mas_wpjmcr_get_max_stars();
+                foreach ( mas_wpjmcr_get_categories() as $index => $category ) : ?>
                     <div class="rating-row list-inline-item mb-3">
-                        <label class="form-label" for='<?php echo $index; ?>'><?php echo apply_filters( 'mas_wpjmcr_category_label', $category ); ?></label>
-                        <div class='stars choose-rating' data-rating-category='<?php echo $index; ?>'>
-                            <?php for ( $i = mas_wpjmcr_get_max_stars(); $i > 0 ; $i-- ) : ?>
-                                <span data-star-rating='<?php echo $i; ?>' class="star dashicons dashicons-star-empty"></span>
+                        <label class="form-label" for="<?php echo esc_attr( $index ); ?>"><?php echo esc_html( apply_filters( 'mas_wpjmcr_category_label', $category ) ); ?></label>
+                        <div class="stars choose-rating" data-rating-category="<?php echo esc_attr( $index ); ?>">
+                            <?php for ( $i = $max_stars; $i > 0; $i-- ) : ?>
+                                <span data-star-rating="<?php echo esc_attr( $i ); ?>" class="star dashicons dashicons-star-empty"></span>
                             <?php endfor; ?>
-                            <input type='hidden' class='required' name='star-rating-<?php echo $index; ?>' value=''>
+                            <input type="hidden" class="required" name="star-rating-<?php echo esc_attr( $index ); ?>" value="">
                         </div>
                     </div><!-- .rating-row -->
                 <?php endforeach; ?>
@@ -99,11 +104,10 @@ class MAS_WPJMCR_Form {
 
         <?php if ( get_option( 'mas_wpjmcr_allow_images', false ) ) : ?>
             <div id="mas-wpjmcr-submit-gallery" class="review-form-gallery mb-6">
-                <div class="btn btn-sm btn-primary transition-3d-hover file-attachment-btn" for="mas-wpjmcr-gallery-input">
+                <div class="btn btn-sm btn-primary transition-3d-hover file-attachment-btn">
                     <?php $label_text = apply_filters( 'mas_wpjmcr_upload_button_text', esc_html__( 'Photo Gallery', 'mas-wp-job-manager-company-reviews' ) ); ?>
-                    <label class="sr-only"><?php echo esc_html( $label_text ) ?></label>
-                    <span><?php echo esc_html( $label_text ) ?></span>
-                    <?php ; ?>
+                    <label class="sr-only" for="mas-wpjmcr-gallery-input"><?php echo esc_html( $label_text ); ?></label>
+                    <span><?php echo esc_html( $label_text ); ?></span>
                     <input id="mas-wpjmcr-gallery-input" name="mas-wpjmcr-gallery[]" type="file" multiple="multiple" accept="image/*" class="file-attachment-btn__label">
                 </div>
             </div><!-- #mas-wpjmcr-submit-gallery -->
@@ -217,11 +221,19 @@ class MAS_WPJMCR_Form {
      * @return string
      */
     public function enable_upload( $submit_field, $args ) {
+        if ( ! is_singular( 'company' ) ) {
+            return $submit_field;
+        }
+        $id_form = isset( $args['id_form'] ) ? $args['id_form'] : 'commentform';
         wp_enqueue_script( 'jquery' );
         ?>
         <script>
-        jQuery( document ).ready( function($) {
-            jQuery( '#<?php echo $args['id_form']; ?>' )[0].encoding = 'multipart/form-data';
+        jQuery( function() {
+            var form = document.getElementById( '<?php echo esc_js( $id_form ); ?>' );
+            if ( form ) {
+                form.encoding = 'multipart/form-data';
+                form.enctype = 'multipart/form-data';
+            }
         } );
         </script>
         <?php

@@ -53,10 +53,10 @@ class MAS_WPJMCR_Submit {
      * @return bool|string
      */
     public function pre_save_review( $approved, $commentdata ) {
-        $post = get_post( $commentdata['comment_post_ID'] );
+        $post = isset( $commentdata['comment_post_ID'] ) ? get_post( $commentdata['comment_post_ID'] ) : null;
 
         // Check post type.
-        if ( 'company' !== $post->post_type ) {
+        if ( ! $post || 'company' !== $post->post_type ) {
             return $approved;
         }
 
@@ -65,19 +65,61 @@ class MAS_WPJMCR_Submit {
             return $approved;
         }
 
-        // Post author cannot submit review.
+        // Enforce guest restriction server-side.
+        $allow_guests = get_option( 'mas_wpjmcr_allow_guests', true ) ? true : false;
+        if ( ! $allow_guests && ! is_user_logged_in() ) {
+            wp_die(
+                esc_html__( 'Guests are not allowed to post a review.', 'mas-wp-job-manager-company-reviews' ),
+                '',
+                array( 'response' => 403, 'back_link' => true )
+            );
+        }
+
+        // Post author cannot submit review (unless allowed in settings).
         if ( ! get_option( 'mas_wpjmcr_allow_owner', '0' ) && absint( $post->post_author ) === absint( get_current_user_id() ) ) {
             return $approved;
         }
 
-        // Get categories.
-        $review_categories = mas_wpjmcr_get_categories();
+        // Enforce single review per user server-side when multiple reviews are disabled.
+        if ( is_user_logged_in() && ! get_option( 'mas_wpjmcr_allow_multiple', false ) ) {
+            $existing_reviews = get_comments(
+                array(
+                    'user_id' => get_current_user_id(),
+                    'post_id' => $post->ID,
+                    'parent'  => 0,
+                    'count'   => true,
+                )
+            );
+            if ( absint( $existing_reviews ) > 0 ) {
+                wp_die(
+                    esc_html__( 'You have already posted a review.', 'mas-wp-job-manager-company-reviews' ),
+                    '',
+                    array( 'response' => 403, 'back_link' => true )
+                );
+            }
+        }
 
-        // Loop category, bail if a category not set. Each comment require user to fill all rating categories.
+        // Get categories and max stars.
+        $review_categories = mas_wpjmcr_get_categories();
+        $max_stars         = mas_wpjmcr_get_max_stars();
+
+        // Loop category, bail if a category not set or out of range. Each comment requires user to fill all rating categories.
         foreach ( $review_categories as $category_slug => $review_category ) {
-            if ( ! isset( $_POST[ 'star-rating-' . $category_slug ] ) || empty( $_POST[ 'star-rating-' . $category_slug ] ) ) {
-                wp_die( esc_html__( '<strong>ERROR:</strong> Please select a rating for all categories.', 'mas-wp-job-manager-company-reviews' ) );
-                $approved = false; // No really needed.
+            if ( ! isset( $_POST[ 'star-rating-' . $category_slug ] ) || '' === $_POST[ 'star-rating-' . $category_slug ] ) {
+                wp_die(
+                    wp_kses_post( __( '<strong>ERROR:</strong> Please select a rating for all categories.', 'mas-wp-job-manager-company-reviews' ) ),
+                    '',
+                    array( 'response' => 400, 'back_link' => true )
+                );
+            }
+
+            $rating_value = absint( wp_unslash( $_POST[ 'star-rating-' . $category_slug ] ) );
+            if ( $rating_value < 1 || $rating_value > $max_stars ) {
+                wp_die(
+                    wp_kses_post( __( '<strong>ERROR:</strong> Please select a valid rating.', 'mas-wp-job-manager-company-reviews' ) ),
+                    '',
+                    array( 'response' => 400, 'back_link' => true )
+                );
             }
         }
 
@@ -108,10 +150,10 @@ class MAS_WPJMCR_Submit {
      * @return void
      */
     public function save_comment_review( $comment_id, $comment_approved, $commentdata ) {
-        $post = get_post( $commentdata['comment_post_ID'] ); // Get post data.
+        $post = isset( $commentdata['comment_post_ID'] ) ? get_post( $commentdata['comment_post_ID'] ) : null; // Get post data.
 
         // Check post type.
-        if ( 'company' !== $post->post_type ) {
+        if ( ! $post || 'company' !== $post->post_type ) {
             return;
         }
         // Bail if not top level comment.
@@ -119,24 +161,21 @@ class MAS_WPJMCR_Submit {
             return;
         }
 
-        $title = isset( $_POST['mas-wpjmcr-title'] ) ? sanitize_text_field( $_POST['mas-wpjmcr-title'] ) : '';
-        // Save submitted title.
-        update_comment_meta( $comment_id, 'mas-wpjmcr-title', $title );
-
-        // Upload Gallery.
-        mas_wpjmcr_handle_uploads( $post->ID, $comment_id );
-
         // Vars.
-        $categories = mas_wpjmcr_get_categories();
-        $stars = array();
+        $categories   = mas_wpjmcr_get_categories();
+        $max_stars    = mas_wpjmcr_get_max_stars();
+        $stars        = array();
         $review_total = 0;
 
         // Loop each categories.
         foreach ( $categories as $index => $category ) {
-            if ( isset ( $_POST['star-rating-' . $index ] ) ) {
+            if ( isset( $_POST[ 'star-rating-' . $index ] ) ) {
 
                 // Single cat review value.
-                $value = sanitize_text_field( $_POST['star-rating-' . $index ] );
+                $value = absint( wp_unslash( $_POST[ 'star-rating-' . $index ] ) );
+                if ( $value < 1 || $value > $max_stars ) {
+                    return;
+                }
 
                 // Stars.
                 $stars[ $category ] = $value;
@@ -148,6 +187,17 @@ class MAS_WPJMCR_Submit {
                 return; // Bail if no review submitted.
             }
         }
+
+        if ( empty( $stars ) ) {
+            return;
+        }
+
+        $title = isset( $_POST['mas-wpjmcr-title'] ) ? sanitize_text_field( wp_unslash( $_POST['mas-wpjmcr-title'] ) ) : '';
+        // Save submitted title.
+        update_comment_meta( $comment_id, 'mas-wpjmcr-title', $title );
+
+        // Upload Gallery.
+        mas_wpjmcr_handle_uploads( $post->ID, $comment_id );
 
         // Save submitted ratings.
         update_comment_meta( $comment_id, 'review_stars', $stars );
