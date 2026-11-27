@@ -44,6 +44,13 @@ class MAS_WPJMCR_Display {
      * @return string Comment content.
      */
     public function review_comment_text( $content, $comment, $args ) {
+        if ( ! $comment instanceof WP_Comment ) {
+            $comment = get_comment( $comment );
+        }
+        if ( ! $comment ) {
+            return $content;
+        }
+
         // Check post type & only display in front end.
         if ( 'company' !== get_post_type( $comment->comment_post_ID ) || ! is_singular( 'company' ) ) {
             return $content;
@@ -58,22 +65,22 @@ class MAS_WPJMCR_Display {
         $comment_id = $comment->comment_ID;
 
         // Get reviews: Array/list of ratings with slug and rating.
-        $ratings = get_comment_meta( $comment_id, 'review_stars', true );
-        $review_title_text = get_comment_meta( get_comment_ID(), 'mas-wpjmcr-title', true );
-        $review_average = mas_wpjmcr_sanitize_number( get_comment_meta( $comment_id, 'review_average', true ) );
-        if ( ! $ratings || ! is_array( $ratings ) || ! $review_average || ! $review_title_text ) {
+        $ratings           = get_comment_meta( $comment_id, 'review_stars', true );
+        $review_title_text = get_comment_meta( $comment_id, 'mas-wpjmcr-title', true );
+        $review_average    = mas_wpjmcr_sanitize_number( get_comment_meta( $comment_id, 'review_average', true ) );
+        if ( ! $ratings || ! is_array( $ratings ) || ! $review_average ) {
             return $content;
         }
 
-        if( !empty( $review_title_text ) ) {
-            $review_title = '<h4 class="mas-wpjmcr-title">' . $review_title_text . '</h4>';
+        if ( ! empty( $review_title_text ) ) {
+            $review_title = '<h4 class="mas-wpjmcr-title">' . esc_html( $review_title_text ) . '</h4>';
         } else {
             $review_title = '';
         }
 
         // Display rating and json markup before comment text.
         $stars = mas_wpjmcr_review_get_stars( $comment_id );
-        $json  = sprintf( '<script type="application/ld+json">%s</script>', wp_json_encode( $this->json_ld( $comment_id, $content, $review_average ) ) );
+        $json  = sprintf( '<script type="application/ld+json">%s</script>', wp_json_encode( $this->json_ld( $comment_id, $content, $review_average ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) );
         return $stars . $json . $review_title . $content;
     }
 
@@ -88,17 +95,23 @@ class MAS_WPJMCR_Display {
      * @return string Comment content.
      */
     public function display_review_gallery( $content, $comment, $args ) {
+        if ( ! $comment instanceof WP_Comment ) {
+            $comment = get_comment( $comment );
+        }
+        if ( ! $comment || 'company' !== get_post_type( $comment->comment_post_ID ) || ! is_singular( 'company' ) || 0 !== intval( $comment->comment_parent ) ) {
+            return $content;
+        }
         return $content . mas_wpjmcr_get_gallery( $comment->comment_ID );
     }
 
     /**
-     * Return reivew data in JSON-LD format.
+     * Return review data in JSON-LD format.
      *
      * @since 1.0.0
      *
-     * @param int $comment_id Review ID.
-     * @param string $content Comment text.
-     * @param int $review_average Review average.
+     * @param int    $comment_id     Review ID.
+     * @param string $content        Comment text.
+     * @param float  $review_average Review average.
      * @return array Review data in JSON-LD format.
      */
     public function json_ld( $comment_id, $content, $review_average ) {
@@ -107,9 +120,9 @@ class MAS_WPJMCR_Display {
         $markup['@type']         = 'Review';
         $markup['url']           = get_comment_link( $comment_id );
         $markup['datePublished'] = get_comment_date( 'c', $comment_id );
-        $markup['description']   = $content;
+        $markup['description']   = wp_strip_all_tags( $content );
         $markup['reviewRating']  = array(
-            '@type'       => 'rating',
+            '@type'       => 'Rating',
             'ratingValue' => $review_average,
         );
         $markup['author']        = array(

@@ -2,9 +2,13 @@
 /**
  * Plugin Name: MAS Company Reviews For WP Job Manager
  * Description: Leave reviews for listings in MAS WP Job Manager Company. Define review categories and choose the number of stars available.
- * Version: 1.0.2
+ * Version: 1.0.3
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
  * Author: MadrasThemes
  * Author URI: https://madrasthemes.com/
+ * License: GPLv3
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * Text Domain: mas-wp-job-manager-company-reviews
  * Domain Path: /languages/
@@ -39,7 +43,13 @@ class MAS_WP_Job_Manager_Company_Reviews {
      */
     private static $instance;
 
-    public $version = '1.0.2';
+    /**
+     * Plugin version.
+     *
+     * @since 1.0.0
+     * @var string
+     */
+    public $version = '1.0.3';
 
     /**
      * Plugin file.
@@ -48,6 +58,78 @@ class MAS_WP_Job_Manager_Company_Reviews {
      * @var string $file Plugin file path.
      */
     public $file = __FILE__;
+
+    /**
+     * Plugin URL.
+     *
+     * @since 1.0.0
+     * @var string
+     */
+    public $plugin_url = '';
+
+    /**
+     * Plugin directory path.
+     *
+     * @since 1.0.0
+     * @var string
+     */
+    public $plugin_dir = '';
+
+    /**
+     * Review form handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Form
+     */
+    public $form;
+
+    /**
+     * Review submit handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Submit
+     */
+    public $submit;
+
+    /**
+     * Review display handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Display
+     */
+    public $display;
+
+    /**
+     * Review edit handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Edit
+     */
+    public $edit;
+
+    /**
+     * Post edit handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Post_Edit
+     */
+    public $post_edit;
+
+    /**
+     * Shortcodes handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Shortcodes
+     */
+    public $shortcodes;
+
+    /**
+     * Settings handler.
+     *
+     * @since 1.0.0
+     * @var MAS_WPJMCR_Settings
+     */
+    public $settings;
 
     /**
      * Construct.
@@ -88,8 +170,8 @@ class MAS_WP_Job_Manager_Company_Reviews {
      */
     public function init() {
 
-        // Load Plugin Translation.
-        load_plugin_textdomain( dirname( plugin_basename( __FILE__ ) ), false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+        // Load Plugin Translation on init to comply with WordPress 6.7+ textdomain loading.
+        add_action( 'init', array( $this, 'load_textdomain' ), 1 );
 
         // Functions.
         require_once( $this->plugin_dir . 'includes/functions.php' );
@@ -147,6 +229,15 @@ class MAS_WP_Job_Manager_Company_Reviews {
     }
 
     /**
+     * Load plugin textdomain.
+     *
+     * @since 1.0.3
+     */
+    public function load_textdomain() {
+        load_plugin_textdomain( 'mas-wp-job-manager-company-reviews', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+    }
+
+    /**
      * Enable Listing Comments
      *
      * @since 1.0.0
@@ -165,13 +256,13 @@ class MAS_WP_Job_Manager_Company_Reviews {
      */
     public function mas_wpjmcr_enqueue_scripts() {
         // General stylesheet.
-        if( apply_filters( 'mas_wpjmcr_enqueue_scripts_enable_frontend_css', true ) ) {
-            wp_enqueue_style( 'mas-wp-job-manager-company-reviews', plugins_url( 'assets/css/mas-wp-job-manager-company-reviews.css', __FILE__ ), array( 'dashicons' ) );
+        if ( apply_filters( 'mas_wpjmcr_enqueue_scripts_enable_frontend_css', true ) ) {
+            wp_enqueue_style( 'mas-wp-job-manager-company-reviews', plugins_url( 'assets/css/mas-wp-job-manager-company-reviews.css', __FILE__ ), array( 'dashicons' ), $this->version );
         }
 
         // Javascript.
-        if( apply_filters( 'mas_wpjmcr_enqueue_scripts_enable_frontend_js', true ) ) {
-            wp_enqueue_script( 'mas-wp-job-manager-company-reviews-js', plugins_url( 'assets/js/mas-wp-job-manager-company-reviews.js', __FILE__ ), array( 'jquery' ) );
+        if ( apply_filters( 'mas_wpjmcr_enqueue_scripts_enable_frontend_js', true ) ) {
+            wp_enqueue_script( 'mas-wp-job-manager-company-reviews-js', plugins_url( 'assets/js/mas-wp-job-manager-company-reviews.js', __FILE__ ), array( 'jquery' ), $this->version, true );
         }
     }
 
@@ -179,11 +270,13 @@ class MAS_WP_Job_Manager_Company_Reviews {
      * Admin scripts.
      *
      * @since 1.0.0
+     *
+     * @param string $hook_suffix Current admin page hook suffix.
      */
     public function mas_wpjmcr_admin_enqueue_scripts( $hook_suffix ) {
         global $post_type;
-        if ( in_array( $hook_suffix, array( 'comment.php', 'edit-comments.php' ) ) || 'post.php' === $hook_suffix && 'company' === $post_type ) {
-            wp_enqueue_style( 'mas-wpjmcr-gallery-admin', $this->plugin_url . 'assets/css/mas-wp-job-manager-company-reviews-gallery-admin.css', array() );
+        if ( in_array( $hook_suffix, array( 'comment.php', 'edit-comments.php' ), true ) || ( 'post.php' === $hook_suffix && 'company' === $post_type ) ) {
+            wp_enqueue_style( 'mas-wpjmcr-gallery-admin', $this->plugin_url . 'assets/css/mas-wp-job-manager-company-reviews-gallery-admin.css', array(), $this->version );
         }
     }
 }
@@ -198,8 +291,9 @@ class MAS_WP_Job_Manager_Company_Reviews {
  * @return object MAS_WP_Job_Manager_Company_Reviews class object.
  */
 function mas_wpjmcr() {
-    if ( ! class_exists( 'MAS_WP_Job_Manager_Company' ) )
-        return;
+    if ( ! class_exists( 'MAS_WP_Job_Manager_Company' ) ) {
+        return null;
+    }
 
     return MAS_WP_Job_Manager_Company_Reviews::instance();
 }

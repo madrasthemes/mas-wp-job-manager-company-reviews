@@ -52,7 +52,7 @@ class MAS_WPJMCR_Post_Edit {
         }
         ?>
         <script type="text/javascript">
-        jQuery( document ).ready( function($) {
+        jQuery( function( $ ) {
             $( '#add-new-comment' ).append( ' <label style="margin-left:10px;"><input type="checkbox" name="mas_wpjmcr_recalculate_reviews" value="<?php echo esc_attr( wp_create_nonce( 'mas_wpjmcr_recalculate_' . get_the_ID() ) ); ?>"> <?php echo esc_html__( 'Recalculate reviews', 'mas-wp-job-manager-company-reviews' ); ?></label>' );
         } );
         </script>
@@ -68,17 +68,21 @@ class MAS_WPJMCR_Post_Edit {
      * @param WP_Post $post Post Object
      */
     public function process_recalculate_checkbox( $post_id, $post ) {
-        if ( 'company' !== $post->post_type || ! isset( $_POST['mas_wpjmcr_recalculate_reviews'] ) ) {
+        if ( ! $post || 'company' !== $post->post_type || ! isset( $_POST['mas_wpjmcr_recalculate_reviews'] ) ) {
+            return $post_id;
+        }
+
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
             return $post_id;
         }
 
         // Verify nonce.
-        if ( ! wp_verify_nonce( $_POST['mas_wpjmcr_recalculate_reviews'], 'mas_wpjmcr_recalculate_' . $post_id ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mas_wpjmcr_recalculate_reviews'] ) ), 'mas_wpjmcr_recalculate_' . $post_id ) ) {
             return $post_id;
         }
 
         // Today date.
-        $today = date( "Ymd" ); // YYYYMMDD.
+        $today = gmdate( 'Ymd' ); // YYYYMMDD.
 
         // Remove data.
         delete_post_meta( $post_id, '_all_ratings' );
@@ -109,11 +113,11 @@ class MAS_WPJMCR_Post_Edit {
      */
     public function redirect_post_location( $location, $post_id ) {
         $post = get_post( $post_id );
-        if ( ! isset( $_POST['save'] ) ) {
+        if ( ! $post || ! isset( $_POST['save'] ) ) {
             return $location;
         }
         if ( 'company' === $post->post_type && isset( $_POST['mas_wpjmcr_recalculate_reviews'] ) ) {
-            $location = add_query_arg( 'mas_wpjmcr_recalculate', intval( get_post_meta( $post_id, '_mas_wpjmcr_recalculate_review_status' ) ), $location );
+            $location = add_query_arg( 'mas_wpjmcr_recalculate', intval( get_post_meta( $post_id, '_mas_wpjmcr_recalculate_review_status', true ) ), $location );
             delete_post_meta( $post_id, '_mas_wpjmcr_recalculate_review_status' );
         }
         return $location;

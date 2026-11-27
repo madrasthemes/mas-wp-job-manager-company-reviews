@@ -32,7 +32,7 @@ if ( ! function_exists( 'mas_wpjmcr_get_categories' ) ) {
 
         $categories = get_option( 'mas_wpjmcr_categories', $default ); // String.
 
-        return array_map( 'trim', explode( ',', $categories ) ); // Array.
+        return array_values( array_filter( array_map( 'trim', explode( ',', (string) $categories ) ), 'strlen' ) ); // Array.
     }
 }
 
@@ -47,7 +47,8 @@ if ( ! function_exists( 'mas_wpjmcr_get_categories' ) ) {
 if ( ! function_exists( 'mas_wpjmcr_get_max_stars' ) ) {
     function mas_wpjmcr_get_max_stars() {
         $stars = get_option( 'mas_wpjmcr_star_count', 5 );
-        return absint( apply_filters( 'mas_wpjmcr_count_stars', $stars ) );
+        $stars = absint( apply_filters( 'mas_wpjmcr_count_stars', $stars ) );
+        return $stars > 0 ? $stars : 5;
     }
 }
 
@@ -86,7 +87,7 @@ if ( ! function_exists( 'mas_wpjmcr_get_reviews' ) ) {
         }
 
         // Check and update data once a day.
-        $today = date( "Ymd" ); // YYYYMMDD.
+        $today = gmdate( 'Ymd' ); // YYYYMMDD.
         $last_updated = get_post_meta( $post_id, '_mas_wpjmcr_last_updated', true );
 
         if ( intval( $today ) !== intval( $last_updated ) || ! $reviews ) {
@@ -200,13 +201,16 @@ if ( ! function_exists( 'mas_wpjmcr_get_catetgory_average_reviews_db' ) ) {
         // Loop all comment and add if it's a review.
         foreach ( $comments as $comment_id ) {
             $ratings = get_comment_meta( $comment_id, 'review_stars', true );
+            if ( ! is_array( $ratings ) ) {
+                continue;
+            }
             foreach ( $ratings as $category => $rating ) {
-                $stars[$category][] = $rating;
+                $stars[ $category ][] = mas_wpjmcr_sanitize_number( $rating );
             }
         }
 
         foreach ( $stars as $key => $star ) {
-            $stars[$key] = array_sum( $star )/count( $star ) ;
+            $stars[ $key ] = ! empty( $star ) ? array_sum( $star ) / count( $star ) : 0;
         }
 
         return $stars;
@@ -219,7 +223,7 @@ if ( ! function_exists( 'mas_wpjmcr_get_catetgory_average_reviews_db' ) ) {
  * @since 1.0.0
  *
  * @param int $post_id Listing ID.
- * @return int
+ * @return float|int
  */
 if ( ! function_exists( 'mas_wpjmcr_get_reviews_average' ) ) {
     function mas_wpjmcr_get_reviews_average( $post_id = null ) {
@@ -227,12 +231,18 @@ if ( ! function_exists( 'mas_wpjmcr_get_reviews_average' ) ) {
             $post_id = get_the_ID();
         }
 
-        // Get review average.
-        $review_average = mas_wpjmcr_sanitize_number( get_post_meta( $post_id, '_average_rating', true ) );
+        if ( ! $post_id || 'company' !== get_post_type( $post_id ) ) {
+            return 0;
+        }
 
-        // Try to update if not found.
-        if ( ! $review_average ) {
+        // Get review average.
+        $raw_average    = get_post_meta( $post_id, '_average_rating', true );
+        $review_average = mas_wpjmcr_sanitize_number( $raw_average );
+
+        // Try to update if not cached yet.
+        if ( '' === $raw_average || ( ! $review_average && ! metadata_exists( 'post', $post_id, '_average_rating' ) ) ) {
             mas_wpjmcr_update_reviews_average( $post_id );
+            $review_average = mas_wpjmcr_sanitize_number( get_post_meta( $post_id, '_average_rating', true ) );
         }
 
         // Still no review average, return 0.
@@ -278,12 +288,13 @@ if ( ! function_exists( 'mas_wpjmcr_reviews_get_stars' ) ) {
         }
 
         // Get review average.
-        $rating = mas_wpjmcr_get_reviews_average( $post_id );
+        $max_stars = mas_wpjmcr_get_max_stars();
+        $rating    = min( $max_stars, max( 0, (float) mas_wpjmcr_get_reviews_average( $post_id ) ) );
 
         // Display stars based on total average ratings.
-        $full_stars = floor( $rating );
-        $half_stars = ceil( $rating - $full_stars );
-        $empty_stars = mas_wpjmcr_get_max_stars() - $full_stars - $half_stars;
+        $full_stars  = max( 0, (int) floor( $rating ) );
+        $half_stars  = max( 0, (int) ceil( $rating - $full_stars ) );
+        $empty_stars = max( 0, (int) ( $max_stars - $full_stars - $half_stars ) );
         ob_start(); 
         ?>
 
@@ -309,25 +320,29 @@ if ( ! function_exists( 'mas_wpjmcr_reviews_get_stars' ) ) {
 if ( ! function_exists( 'mas_wpjmcr_review_get_stars' ) ) {
     function mas_wpjmcr_review_get_stars( $comment_id ) {
         $ratings = get_comment_meta( $comment_id, 'review_stars', true );
-        if( !empty( $ratings ) ) {
-            $review_stars = '<div class="mas-wpjmcr-list-reviews">';
-            foreach ( $ratings as $category => $rating ) {
-                $category = apply_filters( 'mas_wpjmcr_category_label', $category );
-                $review_stars .= '<div class="stars-rating star-rating">';
-                $review_stars .= '<div class="star-rating-title">';
-                $review_stars .= esc_html( $category );
-                $review_stars .= '</div>';
-                $review_stars .= '<div class="ratings">';
-                for ( $i = 0; $i < mas_wpjmcr_get_max_stars(); $i++ ) {
-                    $review_stars .= '<span class="dashicons dashicons-star-' . ( $i < $rating ? 'filled' : 'empty' ) . '"></span>';
-                }
-                $review_stars .= '</div>';
-                $review_stars .= '</div>';
+        if ( empty( $ratings ) || ! is_array( $ratings ) ) {
+            return '';
+        }
+
+        $max_stars    = mas_wpjmcr_get_max_stars();
+        $review_stars = '<div class="mas-wpjmcr-list-reviews">';
+        foreach ( $ratings as $category => $rating ) {
+            $category      = apply_filters( 'mas_wpjmcr_category_label', $category );
+            $numeric_score = (float) mas_wpjmcr_sanitize_number( $rating );
+            $review_stars .= '<div class="stars-rating star-rating">';
+            $review_stars .= '<div class="star-rating-title">';
+            $review_stars .= esc_html( $category );
+            $review_stars .= '</div>';
+            $review_stars .= '<div class="ratings">';
+            for ( $i = 0; $i < $max_stars; $i++ ) {
+                $review_stars .= '<span class="dashicons dashicons-star-' . ( $i < $numeric_score ? 'filled' : 'empty' ) . '"></span>';
             }
             $review_stars .= '</div>';
-
-            return $review_stars;
+            $review_stars .= '</div>';
         }
+        $review_stars .= '</div>';
+
+        return $review_stars;
     }
 }
 
@@ -337,17 +352,18 @@ if ( ! function_exists( 'mas_wpjmcr_review_get_stars' ) ) {
  * @since 1.0.0
  *
  * @param int $post_id Listing ID.
- * @return bool
+ * @return bool|int
  */
 if ( ! function_exists( 'mas_wpjmcr_update_reviews_average' ) ) {
     function mas_wpjmcr_update_reviews_average( $post_id ) {
-        $total = 0;
+        $total   = 0;
         $reviews = mas_wpjmcr_get_reviews( $post_id );
         if ( ! $reviews ) {
-            return mas_wpjmcr_sanitize_number( $total );
+            update_post_meta( $post_id, '_average_rating', 0 );
+            return 0;
         }
         foreach ( $reviews as $review ) {
-            $total += $review;
+            $total += mas_wpjmcr_sanitize_number( $review );
         }
         $average = mas_wpjmcr_sanitize_number( $total / count( $reviews ) );
         return update_post_meta( $post_id, '_average_rating', $average );
@@ -360,12 +376,12 @@ if ( ! function_exists( 'mas_wpjmcr_update_reviews_average' ) ) {
  * @since 1.0.0
  *
  * @param int $comment_id Comment ID.
- * @return int
+ * @return string
  */
 if ( ! function_exists( 'mas_wpjmcr_get_review_average' ) ) {
     function mas_wpjmcr_get_review_average( $comment_id ) {
         $average = get_comment_meta( $comment_id, 'review_average', true );
-        return number_format( mas_wpjmcr_sanitize_number( $average ), 1, '.', ',' );
+        return number_format( (float) mas_wpjmcr_sanitize_number( $average ), 1, '.', ',' );
     }
 }
 
@@ -375,11 +391,15 @@ if ( ! function_exists( 'mas_wpjmcr_get_review_average' ) ) {
  * @since 1.0.0
  *
  * @param string $icon Icon name.
- * @return string
+ * @return string|false
  */
 if ( ! function_exists( 'mas_wpjmcr_get_svg' ) ) {
     function mas_wpjmcr_get_svg( $icon ) {
-        $file =plugin_dir_path( mas_wpjmcr()->file ) . "assets/images/{$icon}.svg";
+        $icon = sanitize_file_name( (string) $icon );
+        if ( empty( $icon ) ) {
+            return false;
+        }
+        $file = plugin_dir_path( mas_wpjmcr()->file ) . "assets/images/{$icon}.svg";
 
         if ( file_exists( $file ) ) {
             ob_start();
@@ -414,23 +434,24 @@ if ( ! function_exists( 'mas_wpjmcr_handle_uploads' ) ) {
         }
 
         // Format multiple files into individual $_FILES data.
-        $_files_gallery = $_FILES['mas-wpjmcr-gallery'];
-        $files_data = array();
+        $_files_gallery  = $_FILES['mas-wpjmcr-gallery'];
+        $original_files  = $_files_gallery;
+        $files_data      = array();
         if ( isset( $_files_gallery['name'] ) && is_array( $_files_gallery['name'] ) ) {
             $file_count = count( $_files_gallery['name'] );
             for ( $n = 0; $n < $file_count; $n++ ) {
-                if( $_files_gallery['name'][$n] && $_files_gallery['type'][$n] && $_files_gallery['tmp_name'][$n] ){
-                    if( ! $_files_gallery['error'][$n] ){ // Check error.
-                        $type = wp_check_filetype( $_files_gallery['name'][$n] );
+                if ( ! empty( $_files_gallery['name'][ $n ] ) && ! empty( $_files_gallery['type'][ $n ] ) && ! empty( $_files_gallery['tmp_name'][ $n ] ) ) {
+                    if ( empty( $_files_gallery['error'][ $n ] ) && file_exists( $_files_gallery['tmp_name'][ $n ] ) ) {
+                        $type = wp_check_filetype( $_files_gallery['name'][ $n ] );
 
                         // Only image allowed.
-                        if ( strpos( $type['type'], 'image' ) !== false ) {
+                        if ( ! empty( $type['type'] ) && 0 === strpos( $type['type'], 'image/' ) ) {
                             $files_data[] = array(
-                                'name'     => $_files_gallery['name'][$n],
+                                'name'     => $_files_gallery['name'][ $n ],
                                 'type'     => $type['type'],
-                                'tmp_name' => $_files_gallery['tmp_name'][$n],
-                                'error'    => $_files_gallery['error'][$n],
-                                'size'     => filesize( $_files_gallery['tmp_name'][$n] ), // in byte.
+                                'tmp_name' => $_files_gallery['tmp_name'][ $n ],
+                                'error'    => $_files_gallery['error'][ $n ],
+                                'size'     => filesize( $_files_gallery['tmp_name'][ $n ] ), // in byte.
                             );
                         }
                     }
@@ -452,12 +473,17 @@ if ( ! function_exists( 'mas_wpjmcr_handle_uploads' ) ) {
             $_FILES['mas-wpjmcr-gallery'] = $file_data;
             $attachment_id = media_handle_upload( 'mas-wpjmcr-gallery', $post_id );
 
-            // Track using attachment/post meta.
-            update_post_meta( $attachment_id, 'mas-wpjmcr-gallery', $comment_id );
+            if ( ! is_wp_error( $attachment_id ) && $attachment_id ) {
+                // Track using attachment/post meta.
+                update_post_meta( $attachment_id, 'mas-wpjmcr-gallery', $comment_id );
 
-            // Track using comment meta (multiple).
-            add_comment_meta( $comment_id, 'mas-wpjmcr-gallery', $attachment_id, false );
+                // Track using comment meta (multiple).
+                add_comment_meta( $comment_id, 'mas-wpjmcr-gallery', $attachment_id, false );
+            }
         }
+
+        // Restore original $_FILES entry.
+        $_FILES['mas-wpjmcr-gallery'] = $original_files;
     }
 }
 
@@ -467,17 +493,20 @@ if ( ! function_exists( 'mas_wpjmcr_handle_uploads' ) ) {
  * @since 1.0.0
  */
 if ( ! function_exists( 'mas_wpjmcr_send_mail' ) ) {
-    function mas_wpjmcr_send_mail( $args ){
-        $sitename = strtolower( $_SERVER['SERVER_NAME'] );
-        if ( substr( $sitename, 0, 4 ) == 'www.' ) {
+    function mas_wpjmcr_send_mail( $args ) {
+        $sitename = isset( $_SERVER['SERVER_NAME'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['SERVER_NAME'] ) ) ) : '';
+        if ( empty( $sitename ) ) {
+            $sitename = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+        }
+        if ( 0 === strpos( $sitename, 'www.' ) ) {
             $sitename = substr( $sitename, 4 );
         }
         $args_default = array(
             'to'             => get_bloginfo( 'admin_email' ),
             'from'           => 'wordpress@' . $sitename,
-            'from_name'      => esc_html( 'Reviews Notification', 'mas-wp-job-manager-company-reviews' ),
+            'from_name'      => esc_html__( 'Reviews Notification', 'mas-wp-job-manager-company-reviews' ),
             'reply_to'       => '',
-            'subject'        => esc_html( 'Reviews Notification', 'mas-wp-job-manager-company-reviews' ),
+            'subject'        => esc_html__( 'Reviews Notification', 'mas-wp-job-manager-company-reviews' ),
             'message'        => '',
             'content_type'   => 'text/html',
             'charset'        => get_bloginfo( 'charset' ),
@@ -485,13 +514,18 @@ if ( ! function_exists( 'mas_wpjmcr_send_mail' ) ) {
         $args = wp_parse_args( $args, $args_default );
         $args = apply_filters( 'mas_wpjmcr_send_mail_args', $args );
 
-        $headers  = array(
-            'From: "' . strip_tags( $args['from_name'] ) . '" <' . sanitize_email( $args['from'] ) . '>',
-            "Reply-To: " . $args['reply_to'],
-            "Content-type: " . $args['content_type'] . "; charset: " . $args['charset'],
+        $headers = array(
+            'From: "' . wp_strip_all_tags( $args['from_name'] ) . '" <' . sanitize_email( $args['from'] ) . '>',
+            'Content-type: ' . sanitize_text_field( $args['content_type'] ) . '; charset: ' . sanitize_text_field( $args['charset'] ),
         );
+        if ( ! empty( $args['reply_to'] ) ) {
+            $reply_to = sanitize_email( $args['reply_to'] );
+            if ( $reply_to ) {
+                $headers[] = 'Reply-To: ' . $reply_to;
+            }
+        }
 
-        return wp_mail( sanitize_email( $args['to'] ), esc_attr( $args['subject'] ), wp_kses_post( $args['message'] ), $headers );
+        return wp_mail( sanitize_email( $args['to'] ), sanitize_text_field( $args['subject'] ), wp_kses_post( $args['message'] ), $headers );
     }
 }
 
@@ -563,7 +597,11 @@ if ( ! function_exists( 'mas_wpjmcr_print_dashboard_notices' ) ) {
 if ( ! function_exists( 'mas_wpjmcr_get_gallery' ) ) {
     function mas_wpjmcr_get_gallery( $comment_id ) {
         $gallery = get_comment_meta( $comment_id, 'mas-wpjmcr-gallery', false );
-        if ( ! $gallery ) {
+        if ( ! $gallery || ! is_array( $gallery ) ) {
+            return '';
+        }
+        $gallery = array_filter( array_map( 'absint', $gallery ) );
+        if ( empty( $gallery ) ) {
             return '';
         }
         ob_start();
@@ -588,9 +626,9 @@ if ( ! function_exists( 'mas_wpjmcr_set_dashboard_notices' ) ) {
     function mas_wpjmcr_set_dashboard_notices( $notice ) {
         $name = get_current_user_id() . '_mas_wpjmcr_notices';
         $data = get_transient( $name );
-        $data = is_array( $data) ?  $data : array();
+        $data = is_array( $data ) ? $data : array();
         $data[] = $notice;
-        return set_transient( $name, $data );
+        return set_transient( $name, $data, DAY_IN_SECONDS );
     }
 }
 

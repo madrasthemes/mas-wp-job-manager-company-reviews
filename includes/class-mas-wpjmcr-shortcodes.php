@@ -42,9 +42,7 @@ class MAS_WPJMCR_Shortcodes {
         add_shortcode( 'mas_wpjmcr_review_dashboard', array( $this, 'shortcode_review_dashboard' ) );
 
         // On review moderate action.
-        if ( is_user_logged_in() && isset( $_GET['c'], $_GET['action'], $_GET['moderate_nonce'] ) && $_GET['c'] && $_GET['action'] && $_GET['moderate_nonce'] ) {
-            add_action( 'init', array( $this, 'moderate_comment_action' ) ); // Need to be in init hook.
-        }
+        add_action( 'init', array( $this, 'moderate_comment_action' ) );
     }
 
 
@@ -59,12 +57,13 @@ class MAS_WPJMCR_Shortcodes {
      * @return string Shortcode output.
      */
     public function shortcode_review_stars( $atts = array() ) {
-        extract( shortcode_atts( array(
+        $atts = shortcode_atts( array(
             'post_id' => get_the_ID(),
-        ), $atts ) );
+        ), $atts );
 
+        $post_id = absint( $atts['post_id'] );
         if ( ! $post_id ) {
-            return;
+            return '';
         }
 
         return '<span class="review-stars">' . mas_wpjmcr_reviews_get_stars( $post_id ) . '</span>';
@@ -82,12 +81,13 @@ class MAS_WPJMCR_Shortcodes {
      * @return string Shortcode output.
      */
     public function shortcode_review_average( $atts = array() ) {
-        extract( shortcode_atts( array(
+        $atts = shortcode_atts( array(
             'post_id' => get_the_ID(),
-        ), $atts ) );
+        ), $atts );
 
+        $post_id = absint( $atts['post_id'] );
         if ( ! $post_id ) {
-            return;
+            return '';
         }
 
         return '<span class="review-average">' . mas_wpjmcr_get_reviews_average( $post_id ) . '</span>';
@@ -105,12 +105,13 @@ class MAS_WPJMCR_Shortcodes {
      * @return string Shortcode output.
      */
     public function shortcode_review_count( $atts = array() ) {
-        extract( shortcode_atts( array(
+        $atts = shortcode_atts( array(
             'post_id' => get_the_ID(),
-        ), $atts ) );
+        ), $atts );
 
+        $post_id = absint( $atts['post_id'] );
         if ( ! $post_id ) {
-            return;
+            return '';
         }
 
         return '<span class="review-count">' . mas_wpjmcr_get_reviews_count( $post_id ) . '</span>';
@@ -165,17 +166,21 @@ class MAS_WPJMCR_Shortcodes {
         $comment_query = new WP_Comment_Query();
         $comment_count = $comment_query->query( array(
             'count'                 => true, // Only return the total number of comment.
+            'post__in'              => $listing_ids ? $listing_ids : array( -1 ),
             'post_author'           => get_current_user_id(),
             'post_type'             => 'company',
+            'author__not_in'        => array( get_current_user_id() ),
             'status'                => 'all',
             'include_unapproved'    => true,
         ) );
 
         ob_start();
-        get_job_manager_template( 'job-review-moderate.php', array(
-            'reviews'               => $reviews,
-            'max_num_pages'         => round( $comment_count / $per_page ),
-        ), '', plugin_dir_path( mas_wpjmcr()->file ) . 'templates/' );
+        if ( function_exists( 'get_job_manager_template' ) ) {
+            get_job_manager_template( 'job-review-moderate.php', array(
+                'reviews'               => $reviews,
+                'max_num_pages'         => ceil( $comment_count / $per_page ),
+            ), '', plugin_dir_path( mas_wpjmcr()->file ) . 'templates/' );
+        }
         return ob_get_clean();
     }
 
@@ -207,8 +212,17 @@ class MAS_WPJMCR_Shortcodes {
      */
     public function moderate_comment_action() {
 
-        // Bail if nonce is not verified
-        if ( ! wp_verify_nonce( $_GET['moderate_nonce'], 'moderate_comment' ) ) {
+        if ( ! is_user_logged_in() || ! get_option( 'mas_wpjmcr_listing_authors_can_moderate', '0' ) ) {
+            return false;
+        }
+
+        if ( empty( $_GET['c'] ) || empty( $_GET['action'] ) || empty( $_GET['moderate_nonce'] ) ) {
+            return false;
+        }
+
+        // Bail if nonce is not verified.
+        $nonce = sanitize_text_field( wp_unslash( $_GET['moderate_nonce'] ) );
+        if ( ! wp_verify_nonce( $nonce, 'moderate_comment' ) ) {
             return false;
         }
 
@@ -219,31 +233,35 @@ class MAS_WPJMCR_Shortcodes {
         }
 
         // Get active actions.
+        $action  = sanitize_key( wp_unslash( $_GET['action'] ) );
         $actions = mas_wpjmcr_dashboard_actions( true );
-        if ( ! array_key_exists( $_GET['action'], $actions ) ) {
+        if ( ! array_key_exists( $action, $actions ) ) {
             return false;
         }
 
         // Get listing.
         $post = get_post( $comment->comment_post_ID );
+        if ( ! $post || 'company' !== $post->post_type ) {
+            return false;
+        }
 
         // Bail if user is not the listing author.
-        if ( get_current_user_id() != $post->post_author ) {
+        if ( absint( get_current_user_id() ) !== absint( $post->post_author ) ) {
             return false;
         }
 
         // Hook.
-        do_action( 'mas_wpjmcr_process_dashboard_comment_action', $_GET['action'], $comment, $post );
+        do_action( 'mas_wpjmcr_process_dashboard_comment_action', $action, $comment, $post );
 
         // Report to admin.
-        if ( 'report' === $_GET['action'] ) {
+        if ( 'report' === $action ) {
             $current_user = wp_get_current_user();
 
             // Notification to admin.
             $args = array(
                 'to'       => get_bloginfo( 'admin_email' ),
                 'reply_to' => $current_user->user_email,
-                'message'  => sprintf( esc_html__( '%1$s requested a review moderation for Review #%2$s for %3$s', 'mas-wp-job-manager-company-reviews' ), "{$current_user->display_name} ({$current_user->user_email})", $comment->comment_ID, $post->post_title ) . '<br/><br/>' . get_edit_comment_link( $comment ),
+                'message'  => sprintf( esc_html__( '%1$s requested a review moderation for Review #%2$s for %3$s', 'mas-wp-job-manager-company-reviews' ), "{$current_user->display_name} ({$current_user->user_email})", $comment->comment_ID, esc_html( $post->post_title ) ) . '<br/><br/>' . esc_url( get_edit_comment_link( $comment ) ),
             );
             $sent = mas_wpjmcr_send_mail( $args );
 
@@ -264,13 +282,13 @@ class MAS_WPJMCR_Shortcodes {
 
             // Action.
             $comment_approved = 0;
-            if ( 'approve' === $_GET['action'] ) {
+            if ( 'approve' === $action ) {
                 $comment_approved = 1;
-            } elseif ( 'unapprove' === $_GET['action'] ) {
+            } elseif ( 'unapprove' === $action ) {
                 $comment_approved = 0;
-            } elseif ( 'spam' === $_GET['action'] ) {
+            } elseif ( 'spam' === $action ) {
                 $comment_approved = 'spam';
-            } elseif ( 'trash' === $_GET['action'] ) {
+            } elseif ( 'trash' === $action ) {
                 $comment_approved = 'trash';
             }
 
@@ -289,7 +307,7 @@ class MAS_WPJMCR_Shortcodes {
         }
 
         // Redirect user back.
-        wp_safe_redirect( esc_url( remove_query_arg( array( 'action', 'c', 'moderate_nonce' ) ) ) );
+        wp_safe_redirect( esc_url_raw( remove_query_arg( array( 'action', 'c', 'moderate_nonce' ) ) ) );
         exit;
     }
 

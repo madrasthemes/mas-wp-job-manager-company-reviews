@@ -1,10 +1,10 @@
 === MAS Company Reviews For WP Job Manager ===
 Contributors: madrasthemes, yousufansa, farookibrahim, ibndawood
 Tags: company review, company reviews, company listings review, company management, company manager, job, job listing
-Requires at least: 4.7
-Tested up to: 6.0
+Requires at least: 5.0
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -62,6 +62,14 @@ Yes you can! Join in on our [GitHub repository](https://github.com/madrasthemes/
 4. Review Settings.
 
 == Changelog ==
+= 1.0.3 - 2026-11-27 =
+* Compatibility: PHP 8.4 and WordPress 7.2 compatibility updates.
+* Fix: Fixed undefined variable, dynamic properties, and potential division-by-zero / str_repeat ValueError on PHP 8+.
+* Fix: Fixed review display when review title is empty or disabled, and fixed comment ID lookup in display filter.
+* Fix: Fixed recalculation redirect status, average rating cache clearing when all reviews are removed, and permanent comment deletion cache sync.
+* Security: Enforced guest and duplicate-review restrictions server-side, validated rating bounds, verified attachment ownership on delete, and hardened output escaping and nonce/capability checks.
+* Tweak: Updated jQuery ready handlers for jQuery 4 compatibility and loaded textdomain on init.
+
 = 1.0.2 - 2021-03-29 =
 * Tested upto 5.7
 

@@ -38,10 +38,11 @@ class MAS_WPJMCR_Edit {
         add_action( 'edit_comment', array( $this, 'save' ), 10, 2 );
 
         // Update reviews.
-        add_action( 'mas_wpjmcr_review_updated', array( $this, 'update_reviews' ), 10, 3 );
+        add_action( 'mas_wpjmcr_review_updated', array( $this, 'update_reviews' ), 10, 2 );
 
-        // Delete gallery on comment delete.
+        // Delete gallery and update reviews on comment delete.
         add_action( 'delete_comment', array( $this, 'delete_comment' ) );
+        add_action( 'deleted_comment', array( $this, 'deleted_comment_update_reviews' ), 10, 2 );
 
         // Delete comment gallery if image is deleted.
         add_action( 'delete_attachment', array( $this, 'delete_attachment' ) );
@@ -60,7 +61,7 @@ class MAS_WPJMCR_Edit {
     public function update_comment_status( $new_status, $old_status, $comment ) {
         $post = get_post( $comment->comment_post_ID );
 
-        if ( 'company' !== $post->post_type ) {
+        if ( ! $post || 'company' !== $post->post_type ) {
             return;
         }
         // Bail if not top level comment.
@@ -178,17 +179,18 @@ class MAS_WPJMCR_Edit {
         ?>
         <table class="form-table">
             <tbody>
-                <?php foreach ( $categories as $index => $category ) :
-                    $current = $stars[ $category ];
-                    $max_star = mas_wpjmcr_get_max_stars();
+                <?php
+                $max_star = mas_wpjmcr_get_max_stars();
+                foreach ( $categories as $index => $category ) :
+                    $current = isset( $stars[ $category ] ) ? $stars[ $category ] : 0;
                 ?>
                     <tr>
-                        <th scope="row"><label for="star-rating-<?php echo esc_attr( $index ); ?>"><?php echo esc_attr( $category ); ?></label></th>
+                        <th scope="row"><label for="star-rating-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $category ); ?></label></th>
                         <td>
                             <select id="star-rating-<?php echo esc_attr( $index ); ?>" name="star-rating-<?php echo esc_attr( $index ); ?>" autocomplete="off">
                                 <?php for ( $i = 1; $i <= $max_star; $i++ ) : ?>
-                                    <option value="<?php echo $i; ?>" <?php selected( $current, $i ); ?>>
-                                        <?php echo $i; ?> - <?php echo str_repeat( '&#9733; ', $i ); ?> <?php echo str_repeat( '&#9734; ', absint( $max_star - $i ) ); ?>
+                                    <option value="<?php echo esc_attr( $i ); ?>" <?php selected( $current, $i ); ?>>
+                                        <?php echo esc_html( $i ); ?> - <?php echo str_repeat( '&#9733; ', $i ); ?> <?php echo str_repeat( '&#9734; ', absint( $max_star - $i ) ); ?>
                                     </option>
                                 <?php endfor; ?>
                             </select>
@@ -246,8 +248,11 @@ class MAS_WPJMCR_Edit {
         </div><!-- #mas-wpjmcr-submit-gallery -->
 
         <script>
-        jQuery( document ).ready( function($) {
-            jQuery( '#post' )[0].encoding = 'multipart/form-data';
+        jQuery( function( $ ) {
+            var postForm = $( '#post' )[0];
+            if ( postForm ) {
+                postForm.encoding = 'multipart/form-data';
+            }
         } );
         </script>
         <?php
@@ -270,7 +275,7 @@ class MAS_WPJMCR_Edit {
         }
 
         // Check the nonce.
-        if ( empty( $_POST['mas_wpjmcr_meta_nonce'] ) || ! wp_verify_nonce( $_POST['mas_wpjmcr_meta_nonce'], 'mas_wpjmcr_save_data' ) ) {
+        if ( empty( $_POST['mas_wpjmcr_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mas_wpjmcr_meta_nonce'] ) ), 'mas_wpjmcr_save_data' ) ) {
             return $comment_id;
         }
 
@@ -287,14 +292,20 @@ class MAS_WPJMCR_Edit {
             $categories = mas_wpjmcr_get_categories();
         }
 
-        $stars = array();
+        $max_stars    = mas_wpjmcr_get_max_stars();
+        $stars        = array();
         $review_total = 0;
 
         foreach ( $categories as $index => $category ) {
-            if ( isset ( $_POST['star-rating-' . $index ] ) ) {
+            if ( isset( $_POST[ 'star-rating-' . $index ] ) ) {
 
                 // Single cat review value.
-                $value = sanitize_text_field( $_POST['star-rating-' . $index ] );
+                $value = absint( wp_unslash( $_POST[ 'star-rating-' . $index ] ) );
+                if ( $value < 1 ) {
+                    $value = 1;
+                } elseif ( $value > $max_stars ) {
+                    $value = $max_stars;
+                }
 
                 // Stars.
                 $stars[ $category ] = $value;
@@ -308,20 +319,23 @@ class MAS_WPJMCR_Edit {
         update_comment_meta( $comment_id, 'review_stars', $stars );
 
         // Save review average:
-        $review_average = $review_total / count( $stars );
+        $review_average = count( $stars ) > 0 ? $review_total / count( $stars ) : 0;
         update_comment_meta( $comment_id, 'review_average', $review_average );
 
         // Upload gallery images.
         mas_wpjmcr_handle_uploads( $data['comment_post_ID'], $comment_id );
 
-        // Delete Gallery images.
-        if ( isset( $_POST['mas-wpjmcr-delete-image'] ) && $_POST['mas-wpjmcr-delete-image'] && is_array( $_POST['mas-wpjmcr-delete-image'] ) ) {
-            foreach ( $_POST['mas-wpjmcr-delete-image'] as $attachment_id ) {
-                wp_delete_attachment( $attachment_id, true );
+        // Delete Gallery images (only attachments belonging to this comment).
+        if ( isset( $_POST['mas-wpjmcr-delete-image'] ) && is_array( $_POST['mas-wpjmcr-delete-image'] ) ) {
+            foreach ( wp_unslash( $_POST['mas-wpjmcr-delete-image'] ) as $attachment_id ) {
+                $attachment_id = absint( $attachment_id );
+                if ( $attachment_id && absint( get_post_meta( $attachment_id, 'mas-wpjmcr-gallery', true ) ) === absint( $comment_id ) ) {
+                    wp_delete_attachment( $attachment_id, true );
+                }
             }
         }
 
-        $title = isset( $_POST['mas-wpjmcr-title'] ) ? sanitize_text_field( $_POST['mas-wpjmcr-title'] ) : '';
+        $title = isset( $_POST['mas-wpjmcr-title'] ) ? sanitize_text_field( wp_unslash( $_POST['mas-wpjmcr-title'] ) ) : '';
         // Save submitted title.
         update_comment_meta( $comment_id, 'mas-wpjmcr-title', $title );
 
@@ -340,8 +354,11 @@ class MAS_WPJMCR_Edit {
      */
     public function update_reviews( $comment_id, $comment_approved ) {
         $comment = get_comment( $comment_id );
-        $post_id = $comment->comment_post_ID;
-        $reviews = mas_wpjmcr_get_reviews( $post_id );
+        if ( ! $comment ) {
+            return;
+        }
+        $post_id        = $comment->comment_post_ID;
+        $reviews        = mas_wpjmcr_get_reviews( $post_id );
         $review_average = get_comment_meta( $comment_id, 'review_average', true );
 
         if ( $comment_approved ) { // Add reviews.
@@ -363,16 +380,38 @@ class MAS_WPJMCR_Edit {
      * @since 1.0.0
      *
      * @param int $comment_id Comment ID.
-     * @return void
+     * @return bool|void
      */
     public function delete_comment( $comment_id ) {
         $gallery = get_comment_meta( $comment_id, 'mas-wpjmcr-gallery', false );
-        if ( ! $gallery ) {
+        if ( ! $gallery || ! is_array( $gallery ) ) {
             return false;
         }
         foreach ( $gallery as $attachment_id ) {
-            wp_delete_attachment( $attachment_id, true );
+            wp_delete_attachment( absint( $attachment_id ), true );
         }
+    }
+
+    /**
+     * Update cached company reviews after a comment is permanently deleted.
+     *
+     * @since 1.0.3
+     *
+     * @param int        $comment_id Comment ID.
+     * @param WP_Comment $comment    Comment object.
+     * @return void
+     */
+    public function deleted_comment_update_reviews( $comment_id, $comment = null ) {
+        if ( ! $comment instanceof WP_Comment ) {
+            return;
+        }
+        $post_id = $comment->comment_post_ID;
+        if ( 'company' !== get_post_type( $post_id ) || 0 !== intval( $comment->comment_parent ) ) {
+            return;
+        }
+        $reviews = mas_wpjmcr_get_reviews_db( $post_id );
+        update_post_meta( $post_id, '_all_ratings', $reviews );
+        mas_wpjmcr_update_reviews_average( $post_id );
     }
 
     /**
